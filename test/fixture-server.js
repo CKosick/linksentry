@@ -26,6 +26,15 @@ export const FIXTURE_EXPECTATIONS = Object.freeze({
   uniqueNetworkUrls: 15
 });
 
+export const LARGE_FIXTURE_EXPECTATIONS = Object.freeze({
+  totalElements: 210,
+  goodCount: 140,
+  brokenCount: 30,
+  blockedCount: 20,
+  skippedCount: 20,
+  uniqueNetworkUrls: 180
+});
+
 /**
  * Creates and starts the fixture server on the specified port.
  * @param {number} [port=8899]
@@ -41,6 +50,77 @@ export function startFixtureServer(port = 8899) {
       if (pathname === '/favicon.ico') {
         res.writeHead(204);
         res.end();
+        return;
+      }
+
+      // Large fixture page (210 links)
+      if (pathname === '/large-page') {
+        const goodLinks = [];
+        for (let i = 1; i <= 130; i++) {
+          goodLinks.push(`<a href="/link-large-200-${i}">Good Link ${i}</a>`);
+        }
+        // 10 duplicate links of /link-large-200-1 to verify large-scale deduplication
+        for (let i = 1; i <= 10; i++) {
+          goodLinks.push(`<a href="/link-large-200-1">Good Link Duplicate ${i}</a>`);
+        }
+
+        const brokenLinks = [];
+        for (let i = 1; i <= 20; i++) {
+          brokenLinks.push(`<a href="/link-large-404-${i}">Broken 404 Link ${i}</a>`);
+        }
+        for (let i = 1; i <= 10; i++) {
+          brokenLinks.push(`<a href="/link-large-500-${i}">Broken 500 Link ${i}</a>`);
+        }
+
+        const blockedLinks = [];
+        for (let i = 1; i <= 10; i++) {
+          blockedLinks.push(`<a href="/link-large-403-${i}">Blocked 403 Link ${i}</a>`);
+        }
+        for (let i = 1; i <= 10; i++) {
+          blockedLinks.push(`<a href="/link-large-429-${i}">Blocked 429 Link ${i}</a>`);
+        }
+
+        const skippedLinks = [];
+        for (let i = 1; i <= 5; i++) {
+          skippedLinks.push(`<a href="mailto:test${i}@example.com">Mailto Link ${i}</a>`);
+          skippedLinks.push(`<a href="tel:+1555555000${i}">Tel Link ${i}</a>`);
+          skippedLinks.push(`<a href="javascript:void(${i})">JS Link ${i}</a>`);
+          skippedLinks.push(`<a href="#section-${i}">Anchor Link ${i}</a>`);
+        }
+
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LinkSentry 200+ Link Stress & SW Restart Fixture</title>
+  <style>
+    body { font-family: sans-serif; padding: 24px; max-width: 960px; margin: 0 auto; }
+    section { margin-bottom: 24px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    a { display: inline-block; margin: 4px 8px 4px 0; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>LinkSentry Large Page Fixture (210 Links)</h1>
+  <section id="sec-large-good">
+    <h2>Good Links (140 elements, 130 unique + 10 dups)</h2>
+    ${goodLinks.join('\n    ')}
+  </section>
+  <section id="sec-large-broken">
+    <h2>Broken Links (30 elements)</h2>
+    ${brokenLinks.join('\n    ')}
+  </section>
+  <section id="sec-large-blocked">
+    <h2>Blocked Links (20 elements)</h2>
+    ${blockedLinks.join('\n    ')}
+  </section>
+  <section id="sec-large-skipped">
+    <h2>Skipped Links (20 elements)</h2>
+    ${skippedLinks.join('\n    ')}
+  </section>
+</body>
+</html>`;
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(html);
         return;
       }
 
@@ -193,6 +273,37 @@ export function startFixtureServer(port = 8899) {
             res.end('Delayed');
           }
         }, 15000);
+        return;
+      }
+
+      // Large page route endpoints
+      if (pathname.startsWith('/link-large-200-')) {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('Large OK');
+        return;
+      }
+
+      if (pathname.startsWith('/link-large-404-')) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Large Not Found');
+        return;
+      }
+
+      if (pathname.startsWith('/link-large-500-')) {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Large Server Error');
+        return;
+      }
+
+      if (pathname.startsWith('/link-large-403-')) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Large Forbidden');
+        return;
+      }
+
+      if (pathname.startsWith('/link-large-429-')) {
+        res.writeHead(429, { 'Content-Type': 'text/plain' });
+        res.end('Large Rate Limited');
         return;
       }
 

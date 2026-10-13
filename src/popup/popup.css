@@ -41,6 +41,19 @@
   padding: 0;
 }
 
+.hidden {
+  display: none !important;
+}
+
+.empty-state.hidden {
+  display: none !important;
+}
+
+html {
+  min-height: 100%;
+  background-color: #0f172a;
+}
+
 body {
   width: 380px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -49,6 +62,16 @@ body {
   background-color: var(--bg-surface);
   color: var(--text-main);
   user-select: none;
+}
+
+@media (min-width: 480px) {
+  body {
+    width: 440px;
+    margin: 60px auto;
+    border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+  }
 }
 
 .popup-container {
@@ -367,6 +390,66 @@ body {
   opacity: 1;
 }
 
+/* Settings Panel */
+.settings-panel {
+  padding: 10px 14px;
+  background-color: #f8fafc;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.settings-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.color-pickers-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.color-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.color-field input[type="color"] {
+  -webkit-appearance: none;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+}
+
+.color-field input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-field input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 3px;
+}
+
 /* Footer */
 .footer {
   display: flex;
@@ -375,6 +458,12 @@ body {
   padding: 10px 14px;
   background-color: var(--bg-subtle);
   border-top: 1px solid var(--border-subtle);
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .footer-privacy-tag {

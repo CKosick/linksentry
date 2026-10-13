@@ -30,20 +30,5 @@
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "src/popup/popup.html",
-        "src/popup/popup.css",
-        "src/popup/popup.js",
-        "src/content/highlighter.css",
-        "src/content/content-script.js"
-      ],
-      "matches": [
-        "http://*/*",
-        "https://*/*"
-      ]
-    }
-  ],
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwsY7JUwaswW13yn+aHvXPk8PI1i+vLgvsJnxdjflgH4xKJUfO/3//4mRSeJa4J0OiuoPQpUa/mnRaDNvbsdYHmbLZ0Xtb5grK0EZfZ/YWJGoLrJ8yQcCaB46o9952jKk84KlO+KXGSrx50GGDE7Zh6vmJUl1RjwgDWejXjinBO0S6kFTg+951CMDTp12A7VG2V6phqsyApLls75WmosfXMF+Rb780pE9w7tRiqaSkdtvVLpW67VKBsXcBKkZfFjesJinB+GQIuqF+56J0HiPw+iFQuWioaLS5tZkwSNhrJWtjPDQEXauCJgwGsGU8zSgkDuPGmI7DpwxUUa72JtZBwIDAQAB"
 }

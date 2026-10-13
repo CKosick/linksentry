@@ -1,37 +1,48 @@
-[2026-10-13T17:08:00.785Z] ====================================================
-[2026-10-13T17:08:00.787Z] Starting LinkSentry Automated Browser Acceptance Test
-[2026-10-13T17:08:00.787Z] ====================================================
-[2026-10-13T17:08:00.787Z] Found Chrome at: C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
-[2026-10-13T17:08:00.800Z] Fixture server running at http://127.0.0.1:8899/
-[2026-10-13T17:08:00.801Z] Launching Chrome with unpacked extension...
-[2026-10-13T17:08:01.585Z] Chrome launched successfully.
-[2026-10-13T17:08:01.766Z] Navigating to fixture page: http://127.0.0.1:8899/
-[2026-10-13T17:08:02.797Z] Injected LinkSentry highlighter stylesheet and content script.
-[2026-10-13T17:08:02.799Z] Executing full LinkSentry scan on fixture page...
-[2026-10-13T17:08:02.816Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 405 (Method Not Allowed)
-[2026-10-13T17:08:02.821Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 404 (Not Found)
-[2026-10-13T17:08:02.823Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 410 (Gone)
-[2026-10-13T17:08:02.824Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 500 (Internal Server Error)
-[2026-10-13T17:08:02.829Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 503 (Service Unavailable)
-[2026-10-13T17:08:05.344Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 401 (Unauthorized)
-[2026-10-13T17:08:05.345Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 403 (Forbidden)
-[2026-10-13T17:08:05.346Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 429 (Too Many Requests)
-[2026-10-13T17:08:05.346Z] Scan finished. Counts: {"total":22,"checked":22,"good":8,"broken":5,"blocked":3,"skipped":6}
-[2026-10-13T17:08:05.348Z] In-Page Highlights verified: {"good":8,"broken":5,"blocked":3,"totalWithStatus":16}
-[2026-10-13T17:08:05.429Z] 📸 Captured Real Screenshot 1: C:\Users\Cliff\Documents\chrome_ext\linksentry\store-assets\screenshot-1-page-scan.png
-[2026-10-13T17:08:05.429Z] Opening Extension Popup UI in browser tab...
-[2026-10-13T17:08:06.496Z] Popup UI Summary verified: {"total":22,"checked":22,"good":8,"broken":5,"blocked":3,"skipped":6,"brokenListItems":5,"blockedListItems":3}
-[2026-10-13T17:08:06.540Z] 📸 Captured Real Screenshot 2: C:\Users\Cliff\Documents\chrome_ext\linksentry\store-assets\screenshot-2-popup-results.png
-[2026-10-13T17:08:06.540Z] Testing locate/focus link feature...
-[2026-10-13T17:08:06.543Z] Focus/locate feature verified: element pulsed and brought into view.
-[2026-10-13T17:08:06.641Z] 📸 Captured Real Screenshot 3: C:\Users\Cliff\Documents\chrome_ext\linksentry\store-assets\screenshot-3-broken-focus.png
-[2026-10-13T17:08:06.641Z] Testing clear highlights action...
-[2026-10-13T17:08:06.643Z] Clear highlights verified: Page fully restored!
-[2026-10-13T17:08:06.643Z] Console Errors count: 0
-[2026-10-13T17:08:06.643Z] Uncaught Exceptions count: 0
-[2026-10-13T17:08:06.643Z] Verifying network requests log...
-[2026-10-13T17:08:06.643Z] Total captured network requests: 20
-[2026-10-13T17:08:06.643Z] Unauthorized outbound requests: 0
-[2026-10-13T17:08:06.644Z] ====================================================
-[2026-10-13T17:08:06.644Z] ALL ACCEPTANCE CRITERIA PASSED GREEN IN BROWSER TEST
-[2026-10-13T17:08:06.644Z] ====================================================
+[2026-10-13T18:02:56.802Z] ====================================================
+[2026-10-13T18:02:56.804Z] Starting LinkSentry Automated Browser Acceptance Test
+[2026-10-13T18:02:56.804Z] ====================================================
+[2026-10-13T18:02:56.804Z] Found Chrome at: C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+[2026-10-13T18:02:56.813Z] Fixture server running at http://127.0.0.1:8899/
+[2026-10-13T18:02:56.813Z] Launching Chrome with unpacked extension...
+[2026-10-13T18:02:57.500Z] Chrome launched successfully.
+[2026-10-13T18:02:57.715Z] Navigating to fixture page: http://127.0.0.1:8899/
+[2026-10-13T18:02:58.991Z] Injected LinkSentry highlighter stylesheet and content script.
+[2026-10-13T18:02:58.993Z] Executing full LinkSentry scan on fixture page...
+[2026-10-13T18:02:59.010Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 405 (Method Not Allowed)
+[2026-10-13T18:02:59.019Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 404 (Not Found)
+[2026-10-13T18:02:59.021Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 410 (Gone)
+[2026-10-13T18:02:59.022Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+[2026-10-13T18:02:59.030Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 503 (Service Unavailable)
+[2026-10-13T18:03:01.536Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 401 (Unauthorized)
+[2026-10-13T18:03:01.536Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 403 (Forbidden)
+[2026-10-13T18:03:01.538Z] [Browser Link Check Status] Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+[2026-10-13T18:03:01.539Z] Scan finished. Counts: {"total":22,"checked":22,"good":8,"broken":5,"blocked":3,"skipped":6}
+[2026-10-13T18:03:01.541Z] In-Page Highlights verified: {"good":8,"broken":5,"blocked":3,"totalWithStatus":16}
+[2026-10-13T18:03:01.612Z] 📸 Captured Real Screenshot 1 (1280x800): C:\Users\Cliff\Documents\chrome_ext\linksentry\store-assets\screenshot-1-page-scan.png
+[2026-10-13T18:03:01.612Z] Opening Extension Popup UI in browser tab...
+[2026-10-13T18:03:02.672Z] Popup UI Summary verified: {"total":22,"checked":22,"good":8,"broken":5,"blocked":3,"skipped":6,"brokenListItems":5,"blockedListItems":3}
+[2026-10-13T18:03:02.672Z] Verifying empty-state hidden behavior (Nova review item 1)...
+[2026-10-13T18:03:02.674Z] Empty-state elements visibility: {"emptyBrokenHasHiddenClass":true,"emptyBrokenDisplay":"none","emptyBlockedHasHiddenClass":true,"emptyBlockedDisplay":"none","brokenUlDisplay":"flex","blockedUlDisplay":"flex"}
+[2026-10-13T18:03:02.675Z] Empty-state verified: hidden when populated, visible when empty!
+[2026-10-13T18:03:02.677Z] Testing user-configurable highlight colors in popup UI (Nova review item 5)...
+[2026-10-13T18:03:02.679Z] Configurable colors verified: {"isVisibleAfterToggle":true,"originalGood":"#10b981","afterResetGood":"#10b981","defaultBroken":"#ef4444","defaultBlocked":"#f59e0b"}
+[2026-10-13T18:03:02.747Z] 📸 Captured Real Screenshot 2 at compliant store size (1280x800): C:\Users\Cliff\Documents\chrome_ext\linksentry\store-assets\screenshot-2-popup-results.png
+[2026-10-13T18:03:02.747Z] Testing locate/focus link feature...
+[2026-10-13T18:03:02.752Z] Focus/locate feature verified: element pulsed and brought into view.
+[2026-10-13T18:03:02.864Z] 📸 Captured Real Screenshot 3 (1280x800): C:\Users\Cliff\Documents\chrome_ext\linksentry\store-assets\screenshot-3-broken-focus.png
+[2026-10-13T18:03:02.864Z] Testing clear highlights action...
+[2026-10-13T18:03:02.866Z] Clear highlights verified: Page fully restored!
+[2026-10-13T18:03:02.866Z] Testing 200+ link fixture scan with simulated service worker restarts (Nova review item 4)...
+[2026-10-13T18:03:02.914Z] Navigating to large fixture: http://127.0.0.1:8899/large-page
+[2026-10-13T18:03:03.671Z] Scanning 210 links on large fixture page in Chrome...
+[2026-10-13T18:03:04.033Z] Large page scan complete. Counts: {"total":210,"checked":210,"good":140,"broken":30,"blocked":20,"skipped":20}
+[2026-10-13T18:03:04.034Z] Large page in-DOM highlights: {"good":140,"broken":30,"blocked":20}
+[2026-10-13T18:03:04.034Z] Large page (210 links) scan & SW resilience verified successfully!
+[2026-10-13T18:03:04.034Z] Console Errors count: 0
+[2026-10-13T18:03:04.034Z] Uncaught Exceptions count: 0
+[2026-10-13T18:03:04.034Z] Verifying network requests log...
+[2026-10-13T18:03:04.034Z] Total captured network requests: 20
+[2026-10-13T18:03:04.034Z] Unauthorized outbound requests: 0
+[2026-10-13T18:03:04.034Z] ====================================================
+[2026-10-13T18:03:04.034Z] ALL ACCEPTANCE CRITERIA PASSED GREEN IN BROWSER TEST
+[2026-10-13T18:03:04.034Z] ====================================================

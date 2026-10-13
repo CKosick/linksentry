@@ -52,7 +52,7 @@ Every permission and host permission requested in `manifest.json` is strictly ju
   - `icons/icon-128.png` (128×128 px)
 - **Store Screenshots (Real Puppeteer Captures from Chrome):**
   - `store-assets/screenshot-1-page-scan.png` (1280×800) — In-page link highlighting (green for good, red for broken, amber for blocked).
-  - `store-assets/screenshot-2-popup-results.png` (380×560) — Summary counts and scrollable broken links list with HTTP status codes.
+  - `store-assets/screenshot-2-popup-results.png` (1280×800) — Summary counts, scrollable broken links list with HTTP status codes, and user-configurable color settings.
   - `store-assets/screenshot-3-broken-focus.png` (1280×800) — Interactive link location and pulsing focus element.
 - **Privacy Policy Page:** `store-assets/privacy.html`
 

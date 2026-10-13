@@ -95,11 +95,38 @@
       </div>
     </main>
 
+    <!-- Settings Panel: Configurable Highlight Colors -->
+    <section id="settings-panel" class="settings-panel hidden" aria-label="Highlight Color Settings">
+      <div class="settings-header">
+        <span class="settings-title">Highlight Colors</span>
+        <button id="btn-reset-colors" class="btn btn-secondary btn-sm" title="Reset colors to default">Reset</button>
+      </div>
+      <div class="color-pickers-row">
+        <label class="color-field" for="color-good">
+          <input type="color" id="color-good" value="#10b981">
+          <span class="color-field-label">Good</span>
+        </label>
+        <label class="color-field" for="color-broken">
+          <input type="color" id="color-broken" value="#ef4444">
+          <span class="color-field-label">Broken</span>
+        </label>
+        <label class="color-field" for="color-blocked">
+          <input type="color" id="color-blocked" value="#f59e0b">
+          <span class="color-field-label">Blocked</span>
+        </label>
+      </div>
+    </section>
+
     <!-- Footer Toolbar -->
     <footer class="footer">
-      <button id="btn-clear" class="btn btn-secondary btn-sm" title="Remove all highlight outlines from page">
-        Clear Highlights
-      </button>
+      <div class="footer-left">
+        <button id="btn-clear" class="btn btn-secondary btn-sm" title="Remove all highlight outlines from page">
+          Clear Highlights
+        </button>
+        <button id="btn-toggle-settings" class="btn btn-secondary btn-sm" title="Configure highlight colors">
+          🎨 Colors
+        </button>
+      </div>
       <span class="footer-privacy-tag" title="100% on-device. No telemetry. No servers.">
         🔒 On-device only
       </span>

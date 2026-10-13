@@ -8,6 +8,7 @@
  */
 
 import { safeSetText, createElementSafe } from '../common/sanitize.js';
+import { DEFAULT_CONFIG } from '../common/config.js';
 
 let activeTabId = null;
 
@@ -15,6 +16,12 @@ let activeTabId = null;
 const btnScan = document.getElementById('btn-scan');
 const scanBtnLabel = document.getElementById('scan-btn-label');
 const btnClear = document.getElementById('btn-clear');
+const btnToggleSettings = document.getElementById('btn-toggle-settings');
+const settingsPanel = document.getElementById('settings-panel');
+const btnResetColors = document.getElementById('btn-reset-colors');
+const colorGood = document.getElementById('color-good');
+const colorBroken = document.getElementById('color-broken');
+const colorBlocked = document.getElementById('color-blocked');
 
 const progressContainer = document.getElementById('progress-container');
 const progressBarFill = document.getElementById('progress-bar-fill');
@@ -59,6 +66,7 @@ async function init() {
     if (tab) activeTabId = tab.id;
 
     setupEventListeners();
+    await loadColorSettings();
 
     // Check stored state
     if (activeTabId && chrome?.storage?.local) {
@@ -84,15 +92,35 @@ function setupEventListeners() {
   tabBroken.addEventListener('click', () => switchTab('broken'));
   tabBlocked.addEventListener('click', () => switchTab('blocked'));
 
+  if (btnToggleSettings && settingsPanel) {
+    btnToggleSettings.addEventListener('click', () => {
+      settingsPanel.classList.toggle('hidden');
+    });
+  }
+
+  if (btnResetColors) {
+    btnResetColors.addEventListener('click', resetColors);
+  }
+
+  if (colorGood) {
+    colorGood.addEventListener('input', () => updateColors({ good: colorGood.value }));
+  }
+  if (colorBroken) {
+    colorBroken.addEventListener('input', () => updateColors({ broken: colorBroken.value }));
+  }
+  if (colorBlocked) {
+    colorBlocked.addEventListener('input', () => updateColors({ blocked: colorBlocked.value }));
+  }
+
   // Listen for progress messages
-  chrome.runtime.onMessage.addListener((message) => {
+  chrome.runtime?.onMessage?.addListener?.((message) => {
     if (message?.action === 'SCAN_PROGRESS' && message.state) {
       renderState(message.state);
     }
   });
 
   // Listen for storage changes
-  chrome.storage.onChanged.addListener((changes, area) => {
+  chrome.storage?.onChanged?.addListener?.((changes, area) => {
     if (area === 'local' && activeTabId) {
       const key = `linksentry_scan_${activeTabId}`;
       if (changes[key]?.newValue) {
@@ -102,6 +130,47 @@ function setupEventListeners() {
       }
     }
   });
+}
+
+async function loadColorSettings() {
+  try {
+    const res = await chrome?.storage?.local?.get?.(['linksentry_config']);
+    const colors = res?.linksentry_config?.colors || DEFAULT_CONFIG.colors;
+    if (colorGood && colors.good) colorGood.value = colors.good;
+    if (colorBroken && colors.broken) colorBroken.value = colors.broken;
+    if (colorBlocked && colors.blocked) colorBlocked.value = colors.blocked;
+  } catch {}
+}
+
+async function updateColors(newColors) {
+  try {
+    const res = await chrome?.storage?.local?.get?.(['linksentry_config']);
+    const currentCfg = res?.linksentry_config || { ...DEFAULT_CONFIG };
+    const updatedCfg = {
+      ...currentCfg,
+      colors: {
+        ...(currentCfg.colors || DEFAULT_CONFIG.colors),
+        ...newColors
+      }
+    };
+    await chrome?.storage?.local?.set?.({ linksentry_config: updatedCfg });
+    if (activeTabId) {
+      chrome?.tabs?.sendMessage?.(activeTabId, {
+        action: 'SET_COLORS',
+        colors: updatedCfg.colors
+      })?.catch?.(() => {});
+    }
+  } catch {}
+}
+
+async function resetColors() {
+  try {
+    const defaultColors = DEFAULT_CONFIG.colors;
+    if (colorGood) colorGood.value = defaultColors.good;
+    if (colorBroken) colorBroken.value = defaultColors.broken;
+    if (colorBlocked) colorBlocked.value = defaultColors.blocked;
+    await updateColors(defaultColors);
+  } catch {}
 }
 
 function switchTab(tabName) {

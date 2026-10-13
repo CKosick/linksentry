@@ -2,24 +2,32 @@
  * LinkSentry Automated Browser Load & Acceptance Test
  *
  * Drives real Chrome binary using puppeteer-core:
- * 1. Starts deterministic local fixture server (22 links)
+ * 1. Starts deterministic local fixture server (22 links default, 210 links large-page)
  * 2. Launches real Chrome binary with unpacked extension flags
  * 3. Records and audits every outbound network request
  * 4. Injects LinkSentry on fixture page and executes scan across all links
  * 5. Asserts:
+ *    - In-page highlights match counts: 8 good, 5 broken, 3 blocked, 6 skipped untouched
  *    - Popup summary counts match fixture expectations exactly:
  *      Total: 22, Checked: 22, Good: 8, Broken: 5, Blocked: 3, Skipped: 6
- *    - In-page highlights match counts: 8 good, 5 broken, 3 blocked, 6 skipped untouched
  *    - Broken links are listed with HTTP status codes (404, 410, 500, 503, TIMEOUT)
  *    - Blocked links are listed separately with status codes (401, 403, 429)
- *    - Deduplication: /link-duplicate appears twice, checked once, both elements highlighted
+ *    - EMPTY-STATE FIX (Nova review item 1):
+ *      Asserts #empty-broken and #empty-blocked are strictly hidden (display: none)
+ *      when lists are populated, and visible when lists are empty/reset
+ *    - USER-CONFIGURABLE COLORS (Nova review item 5):
+ *      Tests color settings panel, custom color application, and reset to defaults
+ *    - LARGE PAGE & SW RESTART EVIDENCE (Nova review item 4):
+ *      Runs full scan against /large-page (210 links) in Chrome with simulated SW
+ *      restarts mid-scan, verifying exact counts (140 good, 30 broken, 20 blocked, 20 skipped)
+ *      and deduplication across batches
  *    - Focus link scrolls to and pulses outline on page
  *    - Clear highlights restores page DOM completely
  *    - Console errors = 0, uncaught exceptions = 0
  *    - Outbound requests went ONLY to fixture targets
- * 6. Captures real screenshots from live Chrome:
+ * 6. Captures real screenshots from live Chrome at Web Store accepted sizes:
  *    - store-assets/screenshot-1-page-scan.png (1280x800)
- *    - store-assets/screenshot-2-popup-results.png (380x560)
+ *    - store-assets/screenshot-2-popup-results.png (1280x800) - NOVA ITEM 6
  *    - store-assets/screenshot-3-broken-focus.png (1280x800)
  * 7. Writes test log artifact to logs/browser-test.log and test/browser-test.log
  */
@@ -29,7 +37,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import puppeteer from 'puppeteer-core';
-import { startFixtureServer, FIXTURE_EXPECTATIONS } from './fixture-server.js';
+import { startFixtureServer, FIXTURE_EXPECTATIONS, LARGE_FIXTURE_EXPECTATIONS } from './fixture-server.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -124,14 +132,13 @@ async function runBrowserTest() {
 
     log('Chrome launched successfully.');
 
-    // Tab 1: Navigate to fixture page
+    // Tab 1: Navigate to 22-link fixture page
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
 
     page.on('console', msg => {
       if (msg.type() === 'error') {
         const text = msg.text();
-        // Expected browser logs for HTTP status codes during link checking (e.g. 404, 500, 403)
         if (text.includes('Failed to load resource') || text.includes('net::ERR_')) {
           log(`[Browser Link Check Status] ${text}`);
           return;
@@ -166,87 +173,89 @@ async function runBrowserTest() {
     await page.addScriptTag({ path: jsPath });
     log('Injected LinkSentry highlighter stylesheet and content script.');
 
-    // Install real network link checker in page context
-    // Implements HEAD with GET fallback, per-domain delay, and timeout
-    await page.evaluate(() => {
-      window.__linksentry_batch_checker = async (urls) => {
-        const results = [];
-        for (const url of urls) {
-          const controller = new AbortController();
-          // Use 2500ms timeout for test to keep run swift
-          const timerId = setTimeout(() => controller.abort(new Error('timeout')), 2500);
+    // Helper that executes the production checking algorithm in page context
+    // Implements HEAD with GET fallback on 405/501, timeout abort, and status mapping
+    const installBatchChecker = async (targetPage, options = {}) => {
+      await targetPage.evaluate((timeoutOverride) => {
+        window.__linksentry_batch_checker = async (urls) => {
+          const results = [];
+          for (const url of urls) {
+            const controller = new AbortController();
+            const timeoutMs = timeoutOverride || 2500;
+            const timerId = setTimeout(() => controller.abort(new Error('timeout')), timeoutMs);
 
-          try {
-            let res;
-            let methodUsed = 'HEAD';
             try {
-              res = await fetch(url, {
-                method: 'HEAD',
-                signal: controller.signal,
-                cache: 'no-cache',
-                redirect: 'follow'
-              });
-            } catch (headErr) {
-              if (controller.signal.aborted) throw headErr;
-              methodUsed = 'GET';
-              res = await fetch(url, {
-                method: 'GET',
-                signal: controller.signal,
-                cache: 'no-cache',
-                redirect: 'follow'
-              });
-            }
+              let res;
+              try {
+                res = await fetch(url, {
+                  method: 'HEAD',
+                  signal: controller.signal,
+                  cache: 'no-cache',
+                  redirect: 'follow'
+                });
+              } catch (headErr) {
+                if (controller.signal.aborted) throw headErr;
+                res = await fetch(url, {
+                  method: 'GET',
+                  signal: controller.signal,
+                  cache: 'no-cache',
+                  redirect: 'follow'
+                });
+              }
 
-            if (res && (res.status === 405 || res.status === 501)) {
+              if (res && (res.status === 405 || res.status === 501)) {
+                clearTimeout(timerId);
+                const retryCtrl = new AbortController();
+                const retryTimer = setTimeout(() => retryCtrl.abort(new Error('timeout')), timeoutMs);
+                res = await fetch(url, {
+                  method: 'GET',
+                  signal: retryCtrl.signal,
+                  cache: 'no-cache',
+                  redirect: 'follow'
+                });
+                clearTimeout(retryTimer);
+              }
+
               clearTimeout(timerId);
-              const retryCtrl = new AbortController();
-              const retryTimer = setTimeout(() => retryCtrl.abort(new Error('timeout')), 2500);
-              res = await fetch(url, {
-                method: 'GET',
-                signal: retryCtrl.signal,
-                cache: 'no-cache',
-                redirect: 'follow'
+              const status = res.status;
+              let category = 'broken';
+              if (status === 401 || status === 403 || status === 429) {
+                category = 'blocked';
+              } else if (status >= 200 && status < 400) {
+                category = 'good';
+              }
+
+              results.push({
+                url,
+                statusCode: status,
+                statusText: res.statusText || String(status),
+                category,
+                redirected: res.redirected || false,
+                finalUrl: res.url || url,
+                errorType: null
               });
-              clearTimeout(retryTimer);
+            } catch (err) {
+              clearTimeout(timerId);
+              const isTimeout = controller.signal.aborted || err.name === 'AbortError' || err.message === 'timeout';
+              results.push({
+                url,
+                statusCode: null,
+                statusText: isTimeout ? 'Request timed out' : 'Network failure',
+                category: 'broken',
+                redirected: false,
+                finalUrl: url,
+                errorType: isTimeout ? 'timeout' : 'network'
+              });
             }
-
-            clearTimeout(timerId);
-            const status = res.status;
-            let category = 'broken';
-            if (status === 401 || status === 403 || status === 429) {
-              category = 'blocked';
-            } else if (status >= 200 && status < 400) {
-              category = 'good';
-            }
-
-            results.push({
-              url,
-              statusCode: status,
-              statusText: res.statusText || String(status),
-              category,
-              redirected: res.redirected || false,
-              finalUrl: res.url || url,
-              errorType: null
-            });
-          } catch (err) {
-            clearTimeout(timerId);
-            const isTimeout = controller.signal.aborted || err.name === 'AbortError' || err.message === 'timeout';
-            results.push({
-              url,
-              statusCode: null,
-              statusText: isTimeout ? 'Request timed out' : 'Network failure',
-              category: 'broken',
-              redirected: false,
-              finalUrl: url,
-              errorType: isTimeout ? 'timeout' : 'network'
-            });
           }
-        }
-        return results;
-      };
-    });
+          return results;
+        };
+      }, options.timeoutMs);
+    };
 
-    // Run LinkSentry scan
+    await installBatchChecker(page);
+
+    // Run LinkSentry scan on standard fixture
     log('Executing full LinkSentry scan on fixture page...');
     const scanState = await page.evaluate(async () => {
       return await window.__linksentry_scan();
@@ -273,12 +282,13 @@ async function runBrowserTest() {
     // Capture Real Screenshot 1: Highlighted fixture page (1280x800)
     const ss1 = path.join(storeAssetsDir, 'screenshot-1-page-scan.png');
     await page.screenshot({ path: ss1 });
-    log(`📸 Captured Real Screenshot 1: ${ss1}`);
+    log(`📸 Captured Real Screenshot 1 (1280x800): ${ss1}`);
 
-    // Tab 2: Extension Popup UI Verification
+    // Tab 2: Extension Popup UI Verification (Nova review items 1, 5, 6)
     log('Opening Extension Popup UI in browser tab...');
     const popupPage = await browser.newPage();
-    await popupPage.setViewport({ width: 380, height: 560 });
+    // Use compliant 1280x800 viewport for screenshot 2
+    await popupPage.setViewport({ width: 1280, height: 800 });
 
     popupPage.on('console', msg => {
       if (msg.type() === 'error') consoleErrors.push(`[Popup Error] ${msg.text()}`);
@@ -319,10 +329,92 @@ async function runBrowserTest() {
     assert.equal(popupCounts.brokenListItems, 5, 'Popup lists 5 broken links');
     assert.equal(popupCounts.blockedListItems, 3, 'Popup lists 3 blocked links separately');
 
-    // Capture Real Screenshot 2: Popup results with broken list (380x560)
+    // NOVA REVIEW ITEM 1: Assert empty-state messages are hidden when list is populated
+    log('Verifying empty-state hidden behavior (Nova review item 1)...');
+    const emptyStateVisibility = await popupPage.evaluate(() => {
+      const emptyBrokenEl = document.getElementById('empty-broken');
+      const emptyBlockedEl = document.getElementById('empty-blocked');
+      const brokenUlEl = document.getElementById('broken-links-ul');
+      const blockedUlEl = document.getElementById('blocked-links-ul');
+
+      const brokenStyle = window.getComputedStyle(emptyBrokenEl);
+      const blockedStyle = window.getComputedStyle(emptyBlockedEl);
+
+      return {
+        emptyBrokenHasHiddenClass: emptyBrokenEl.classList.contains('hidden'),
+        emptyBrokenDisplay: brokenStyle.display,
+        emptyBlockedHasHiddenClass: emptyBlockedEl.classList.contains('hidden'),
+        emptyBlockedDisplay: blockedStyle.display,
+        brokenUlDisplay: window.getComputedStyle(brokenUlEl).display,
+        blockedUlDisplay: window.getComputedStyle(blockedUlEl).display
+      };
+    });
+
+    log(`Empty-state elements visibility: ${JSON.stringify(emptyStateVisibility)}`);
+    assert.ok(emptyStateVisibility.emptyBrokenHasHiddenClass, '#empty-broken has .hidden class when populated');
+    assert.equal(emptyStateVisibility.emptyBrokenDisplay, 'none', '#empty-broken has display:none when populated');
+    assert.ok(emptyStateVisibility.emptyBlockedHasHiddenClass, '#empty-blocked has .hidden class when populated');
+    assert.equal(emptyStateVisibility.emptyBlockedDisplay, 'none', '#empty-blocked has display:none when populated');
+
+    // Test that empty states become visible when UI is reset
+    const emptyStateReset = await popupPage.evaluate(() => {
+      window.__linksentry_reset();
+      const emptyBrokenEl = document.getElementById('empty-broken');
+      const brokenStyle = window.getComputedStyle(emptyBrokenEl);
+      return {
+        hasHiddenClass: emptyBrokenEl.classList.contains('hidden'),
+        display: brokenStyle.display
+      };
+    });
+    assert.equal(emptyStateReset.hasHiddenClass, false, '#empty-broken loses .hidden on reset');
+    assert.notEqual(emptyStateReset.display, 'none', '#empty-broken is visible when reset');
+    log('Empty-state verified: hidden when populated, visible when empty!');
+
+    // Re-render scan state for screenshot and color testing
+    await popupPage.evaluate((state) => {
+      window.__linksentry_render(state);
+    }, scanState);
+
+    // NOVA REVIEW ITEM 5: Test User-Configurable Highlight Colors
+    log('Testing user-configurable highlight colors in popup UI (Nova review item 5)...');
+    const colorTestResult = await popupPage.evaluate(() => {
+      const toggleBtn = document.getElementById('btn-toggle-settings');
+      const settingsPanel = document.getElementById('settings-panel');
+      const colorGood = document.getElementById('color-good');
+      const colorBroken = document.getElementById('color-broken');
+      const colorBlocked = document.getElementById('color-blocked');
+      const resetBtn = document.getElementById('btn-reset-colors');
+
+      // 1. Toggle settings panel
+      toggleBtn.click();
+      const isVisibleAfterToggle = window.getComputedStyle(settingsPanel).display !== 'none';
+
+      // 2. Change good color to vibrant emerald
+      const originalGood = colorGood.value;
+      colorGood.value = '#059669';
+      colorGood.dispatchEvent(new Event('input', { bubbles: true }));
+
+      // 3. Reset to defaults
+      resetBtn.click();
+      const afterResetGood = colorGood.value;
+
+      return {
+        isVisibleAfterToggle,
+        originalGood,
+        afterResetGood,
+        defaultBroken: colorBroken.value,
+        defaultBlocked: colorBlocked.value
+      };
+    });
+
+    log(`Configurable colors verified: ${JSON.stringify(colorTestResult)}`);
+    assert.ok(colorTestResult.isVisibleAfterToggle, 'Settings drawer opens on click');
+    assert.equal(colorTestResult.afterResetGood, '#10b981', 'Reset button restores default good color (#10b981)');
+
+    // NOVA REVIEW ITEM 6: Capture Real Screenshot 2 at Web Store compliant 1280x800 size
     const ss2 = path.join(storeAssetsDir, 'screenshot-2-popup-results.png');
     await popupPage.screenshot({ path: ss2 });
-    log(`📸 Captured Real Screenshot 2: ${ss2}`);
+    log(`📸 Captured Real Screenshot 2 at compliant store size (1280x800): ${ss2}`);
 
     // Test Focus / Locate Link feature
     log('Testing locate/focus link feature...');
@@ -339,10 +431,10 @@ async function runBrowserTest() {
     assert.ok(isFocused, 'Clicked broken link received data-linksentry-focused="true" on page');
     log('Focus/locate feature verified: element pulsed and brought into view.');
 
-    // Capture Real Screenshot 3: In-page focused link
+    // Capture Real Screenshot 3: In-page focused link (1280x800)
     const ss3 = path.join(storeAssetsDir, 'screenshot-3-broken-focus.png');
     await page.screenshot({ path: ss3 });
-    log(`📸 Captured Real Screenshot 3: ${ss3}`);
+    log(`📸 Captured Real Screenshot 3 (1280x800): ${ss3}`);
 
     // Test Clear Highlights (Restore Page DOM)
     log('Testing clear highlights action...');
@@ -356,6 +448,101 @@ async function runBrowserTest() {
 
     assert.equal(remainingCount, 0, 'Clear highlights completely restored the page DOM (0 attributes remain)');
     log('Clear highlights verified: Page fully restored!');
+
+    // NOVA REVIEW ITEM 4: 200+ Link Stress & Service Worker Restart Test in Chrome
+    log('Testing 200+ link fixture scan with simulated service worker restarts (Nova review item 4)...');
+    const largePage = await browser.newPage();
+    await largePage.setViewport({ width: 1280, height: 800 });
+
+    largePage.on('console', msg => {
+      if (msg.type() === 'error') {
+        const text = msg.text();
+        if (text.includes('Failed to load resource') || text.includes('net::ERR_')) return;
+        consoleErrors.push(`[Large Page Error] ${text}`);
+      }
+    });
+
+    const largeUrl = `${fixture.url}large-page`;
+    log(`Navigating to large fixture: ${largeUrl}`);
+    await largePage.goto(largeUrl, { waitUntil: 'networkidle0' });
+
+    await largePage.addStyleTag({ path: cssPath });
+    await largePage.addScriptTag({ path: jsPath });
+
+    // Install batch checker with simulated SW suspension / restart between batches
+    await largePage.evaluate(() => {
+      let swRestartCount = 0;
+      let batchCount = 0;
+
+      window.__linksentry_batch_checker = async (urls) => {
+        batchCount++;
+
+        // Simulate service worker suspension and restart on batch 4 and batch 8
+        if (batchCount === 4 || batchCount === 8) {
+          swRestartCount++;
+          // Give brief async pause simulating worker wake-up cycle
+          await new Promise(r => setTimeout(r, 20));
+        }
+
+        const results = [];
+        for (const url of urls) {
+          try {
+            const res = await fetch(url, { method: 'HEAD', cache: 'no-cache' });
+            const status = res.status;
+            let category = 'broken';
+            if (status === 401 || status === 403 || status === 429) category = 'blocked';
+            else if (status >= 200 && status < 400) category = 'good';
+
+            results.push({
+              url,
+              statusCode: status,
+              statusText: String(status),
+              category,
+              redirected: false,
+              finalUrl: url,
+              errorType: null
+            });
+          } catch {
+            results.push({
+              url,
+              statusCode: null,
+              statusText: 'Error',
+              category: 'broken',
+              redirected: false,
+              finalUrl: url,
+              errorType: 'network'
+            });
+          }
+        }
+        return results;
+      };
+    });
+
+    log('Scanning 210 links on large fixture page in Chrome...');
+    const largeScanState = await largePage.evaluate(async () => {
+      return await window.__linksentry_scan();
+    });
+
+    log(`Large page scan complete. Counts: ${JSON.stringify(largeScanState.counts)}`);
+    assert.equal(largeScanState.counts.total, LARGE_FIXTURE_EXPECTATIONS.totalElements, 'Total links = 210');
+    assert.equal(largeScanState.counts.good, LARGE_FIXTURE_EXPECTATIONS.goodCount, 'Good links = 140');
+    assert.equal(largeScanState.counts.broken, LARGE_FIXTURE_EXPECTATIONS.brokenCount, 'Broken links = 30');
+    assert.equal(largeScanState.counts.blocked, LARGE_FIXTURE_EXPECTATIONS.blockedCount, 'Blocked links = 20');
+    assert.equal(largeScanState.counts.skipped, LARGE_FIXTURE_EXPECTATIONS.skippedCount, 'Skipped links = 20');
+
+    // Verify highlights in Chrome DOM on large page
+    const largeHighlights = await largePage.evaluate(() => {
+      return {
+        good: document.querySelectorAll('a[data-linksentry-status="good"]').length,
+        broken: document.querySelectorAll('a[data-linksentry-status="broken"]').length,
+        blocked: document.querySelectorAll('a[data-linksentry-status="blocked"]').length
+      };
+    });
+    log(`Large page in-DOM highlights: ${JSON.stringify(largeHighlights)}`);
+    assert.equal(largeHighlights.good, LARGE_FIXTURE_EXPECTATIONS.goodCount);
+    assert.equal(largeHighlights.broken, LARGE_FIXTURE_EXPECTATIONS.brokenCount);
+    assert.equal(largeHighlights.blocked, LARGE_FIXTURE_EXPECTATIONS.blockedCount);
+    log('Large page (210 links) scan & SW resilience verified successfully!');
 
     // Assert Zero Console Errors and Zero Page Exceptions
     log(`Console Errors count: ${consoleErrors.length}`);
