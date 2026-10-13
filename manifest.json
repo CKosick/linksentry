@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "LinkSentry - Broken Link Checker",
+  "version": "1.0.0",
+  "description": "Fast, privacy-focused broken link checker for the current page. Highlights good, broken, and blocked links with live status.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "LinkSentry",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/popup/popup.html",
+        "src/popup/popup.css",
+        "src/popup/popup.js",
+        "src/content/highlighter.css",
+        "src/content/content-script.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ],
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwsY7JUwaswW13yn+aHvXPk8PI1i+vLgvsJnxdjflgH4xKJUfO/3//4mRSeJa4J0OiuoPQpUa/mnRaDNvbsdYHmbLZ0Xtb5grK0EZfZ/YWJGoLrJ8yQcCaB46o9952jKk84KlO+KXGSrx50GGDE7Zh6vmJUl1RjwgDWejXjinBO0S6kFTg+951CMDTp12A7VG2V6phqsyApLls75WmosfXMF+Rb780pE9w7tRiqaSkdtvVLpW67VKBsXcBKkZfFjesJinB+GQIuqF+56J0HiPw+iFQuWioaLS5tZkwSNhrJWtjPDQEXauCJgwGsGU8zSgkDuPGmI7DpwxUUa72JtZBwIDAQAB"
+}

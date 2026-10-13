@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkSentry</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <img src="../../icons/icon-48.png" alt="LinkSentry Logo" class="brand-icon">
+        <div class="brand-text">
+          <h1 class="brand-title">LinkSentry</h1>
+          <span class="brand-tagline">Broken Link Checker</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-scan" class="btn btn-primary" title="Scan links on current page">
+          <span class="btn-icon">⚡</span>
+          <span id="scan-btn-label">Scan Page</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scanning Progress Bar -->
+    <div id="progress-container" class="progress-container hidden">
+      <div class="progress-bar-track">
+        <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+      </div>
+      <div class="progress-status">
+        <span id="progress-text">Scanning links...</span>
+        <span id="progress-percent">0%</span>
+      </div>
+    </div>
+
+    <!-- Summary Stats Grid -->
+    <section class="stats-grid" aria-label="Link counts">
+      <div class="stat-card stat-total" title="Total links found on page">
+        <div class="stat-value" id="count-total">0</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card stat-checked" title="Checked links">
+        <div class="stat-value" id="count-checked">0</div>
+        <div class="stat-label">Checked</div>
+      </div>
+      <div class="stat-card stat-good" title="Good links (2xx, 3xx)">
+        <div class="stat-value" id="count-good">0</div>
+        <div class="stat-label">Good</div>
+      </div>
+      <div class="stat-card stat-broken" title="Broken links (404, 410, 5xx, timeout, network error)">
+        <div class="stat-value" id="count-broken">0</div>
+        <div class="stat-label">Broken</div>
+      </div>
+      <div class="stat-card stat-blocked" title="Blocked by server (401, 403, 429)">
+        <div class="stat-value" id="count-blocked">0</div>
+        <div class="stat-label">Blocked</div>
+      </div>
+      <div class="stat-card stat-skipped" title="Skipped (mailto, anchors, non-http)">
+        <div class="stat-value" id="count-skipped">0</div>
+        <div class="stat-label">Skipped</div>
+      </div>
+    </section>
+
+    <!-- View Tabs: Broken / Blocked / All -->
+    <nav class="tabs-nav" aria-label="Result lists">
+      <button class="tab-btn active" id="tab-broken" data-target="list-broken">
+        Broken (<span id="tab-broken-count">0</span>)
+      </button>
+      <button class="tab-btn" id="tab-blocked" data-target="list-blocked">
+        Blocked (<span id="tab-blocked-count">0</span>)
+      </button>
+    </nav>
+
+    <!-- Results Lists -->
+    <main class="lists-container">
+      <!-- Broken Links List -->
+      <div id="list-broken" class="links-list-panel active">
+        <div id="empty-broken" class="empty-state">
+          <p class="empty-title">No broken links found</p>
+          <p class="empty-sub">Click "Scan Page" to scan all links on this page.</p>
+        </div>
+        <ul id="broken-links-ul" class="links-ul hidden" aria-label="Broken links list"></ul>
+      </div>
+
+      <!-- Blocked Links List -->
+      <div id="list-blocked" class="links-list-panel hidden">
+        <div id="empty-blocked" class="empty-state">
+          <p class="empty-title">No blocked links</p>
+          <p class="empty-sub">Sites that return 401, 403, or 429 appear here.</p>
+        </div>
+        <ul id="blocked-links-ul" class="links-ul hidden" aria-label="Blocked links list"></ul>
+      </div>
+    </main>
+
+    <!-- Footer Toolbar -->
+    <footer class="footer">
+      <button id="btn-clear" class="btn btn-secondary btn-sm" title="Remove all highlight outlines from page">
+        Clear Highlights
+      </button>
+      <span class="footer-privacy-tag" title="100% on-device. No telemetry. No servers.">
+        🔒 On-device only
+      </span>
+    </footer>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+/**
+ * LinkSentry In-Page Highlighter Styles
+ *
+ * Safe DOM rules:
+ * - Uses outline and box-shadow only (NO layout-shifting borders or margin changes)
+ * - Restores fully when highlights are cleared
+ * - Supports custom theme colors via CSS custom properties
+ */
+
+:root {
+  --linksentry-good-color: #10b981;
+  --linksentry-broken-color: #ef4444;
+  --linksentry-blocked-color: #f59e0b;
+}
+
+/* Good links (2xx, 3xx) */
+a[data-linksentry-status="good"] {
+  outline: 2px solid var(--linksentry-good-color) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2) !important;
+  transition: outline 0.15s ease-in-out !important;
+}
+
+/* Broken links (404, 410, 5xx, timeout, network error) */
+a[data-linksentry-status="broken"] {
+  outline: 2px solid var(--linksentry-broken-color) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25) !important;
+  transition: outline 0.15s ease-in-out !important;
+}
+
+/* Blocked links (401, 403, 429) */
+a[data-linksentry-status="blocked"] {
+  outline: 2px dashed var(--linksentry-blocked-color) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25) !important;
+  transition: outline 0.15s ease-in-out !important;
+}
+
+/* Target focus animation when clicked in popup */
+a[data-linksentry-focused="true"] {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 12px 3px rgba(59, 130, 246, 0.6) !important;
+  animation: linksentry-pulse 1.5s ease-in-out infinite !important;
+}
+
+@keyframes linksentry-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}

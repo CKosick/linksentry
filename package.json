@@ -1,0 +1,26 @@
+{
+  "name": "linksentry",
+  "version": "1.0.0",
+  "description": "One-click broken link checker for the current page. Manifest V3 successor to Check My Links.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/unit.test.js",
+    "test:browser": "node test/browser.test.js",
+    "generate:icons": "node scripts/generate-icons.js",
+    "audit:network": "node scripts/network-audit-verify.js",
+    "package": "node scripts/package.js"
+  },
+  "keywords": [
+    "chrome-extension",
+    "link-checker",
+    "broken-links",
+    "manifest-v3",
+    "seo"
+  ],
+  "author": "Cliff Kosick",
+  "license": "MIT",
+  "devDependencies": {
+    "adm-zip": "^0.5.16",
+    "puppeteer-core": "^24.4.0"
+  }
+}

@@ -1,0 +1,36 @@
+LinkSentry - Fast, Privacy-Focused Broken Link Checker (Manifest V3)
+
+One-click broken link checker for the current page. The modern, maintained Manifest V3 successor to Check My Links.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHY LINKSENTRY?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+For years, Check My Links was the undisputed standard tool for site owners and content editors doing everyday link hygiene. But following its discontinuation in 2019 and removal in the Manifest V2 retirement, web creators have been left without a modern, lightweight, privacy-respecting in-browser checker.
+
+LinkSentry is built from the ground up on Manifest V3 to fill that void.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HONEST POSITIONING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Full-time technical SEO agencies already run heavy desktop crawlers like Screaming Frog or enterprise platforms like Ahrefs.
+
+LinkSentry is built for the rest of us: bloggers, writers, site owners, freelance webmasters, and QA testers who want instant, friction-free verification of a single live page right in Chrome without launching a giant crawl or waiting in a cloud queue.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KEY FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• ONE-CLICK PAGE SCAN: Checks all links on your active tab in seconds.
+• IN-PAGE HIGHLIGHTING: Highlights good links green (2xx/3xx), broken links red (404/410/5xx), and blocked links amber (401/403/429) using clean outlines that never alter page layout.
+• ACCURATE CATEGORIZATION: Sites that block automated checks (401, 403, 429) are reported separately as "Blocked", never misdiagnosed as broken.
+• INSTANT FOCUS & LOCATE: Click any broken link in the popup list to instantly scroll to and highlight that element on your page.
+• SMART DEDUPLICATION: Multiple links pointing to the identical target URL are checked once over the wire, but every instance on your page is highlighted.
+• RESPECTFUL CHECKING: Concurrency limited to 5 with per-domain delays, HEAD requests first with GET fallbacks, and strict request timeouts to prevent accidental hammering.
+• CLEAR HIGHLIGHTS IN ONE CLICK: Fully restores your page's original styling with zero leftover DOM pollution.
+• 100% PRIVATE & ON-DEVICE: Zero analytics. Zero tracking. Zero remote servers. Network requests go only to the links you choose to check.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FREE & OPEN SOURCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LinkSentry is 100% free and open-source under the MIT license.
+Source code: https://github.com/CKosick/linksentry
+Created by Cliff Kosick.
